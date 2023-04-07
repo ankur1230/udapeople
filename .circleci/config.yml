@@ -113,7 +113,7 @@ jobs:
                 }
               ]
             }
-          event: fail
+          event: always
 
 workflows:
   default:
@@ -130,3 +130,5 @@ workflows:
           requires: [build-backend]
       - notify:
           context: my-context
+          requires: [scan-frontend]
+          requires: [scan-backend]
