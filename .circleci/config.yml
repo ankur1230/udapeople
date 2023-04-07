@@ -82,7 +82,6 @@ jobs:
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
-      - image: cimg/base:stable
     steps:
       - checkout
       - restore_cache:
@@ -95,6 +94,7 @@ jobs:
             npm audit fix --audit-level=critical
             exit 1
       - slack/notify:
+          context: my-context
           event: fail
           mentions: '@Ankur Khandelwal'
           template: basic_fail_1
