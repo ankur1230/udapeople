@@ -130,5 +130,6 @@ workflows:
           requires: [build-backend]
       - notify:
           context: my-context
-          requires: [scan-frontend]
-          requires: [scan-backend]
+          requires:
+            - scan-frontend
+            - scan-backend
