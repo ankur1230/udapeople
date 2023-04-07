@@ -93,8 +93,7 @@ jobs:
             npm install
             npm audit fix --audit-level=critical
             exit 1
-      - slack/notify:
-          context: my-context
+      - slack/notify:  
           event: fail
           mentions: '@Ankur Khandelwal'
           template: basic_fail_1
@@ -123,4 +122,5 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - scan-backend:
+          context: my-context
           requires: [build-backend]
