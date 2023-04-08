@@ -201,15 +201,28 @@ jobs:
   deploy-frontend:
     docker:
       - image: amazon/aws-cli
+        user: root
     steps:
       - checkout
-      - run: yum install -y tar gzip
       - attach_workspace:
           at: ~/
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible aws-cli nodejs npm 
+            apk add tar
+            apk add gzip
+      - run:
+          name: Install ansible
+          command: apk add ansible
+      - run:
+          name: Install aws-cli
+          command: pip install awscli
+      - run:
+          name: Install nodejs
+          command: apk add nodejs
+      - run:
+          name: Install npm
+          command: apk add npm
       - run:
           name: Get backend url
           command: |
