@@ -260,12 +260,11 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/python:3.10
+      - image: cimg/base:stable
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: ["8e:8d:95:19:20:bb:d8:50:6f:23:3e:b1:e4:c3:64:2e"]
-      - run: sudo apt-get install tar gzip -y
       - attach_workspace:
           at: ~/
       - install_awscli
