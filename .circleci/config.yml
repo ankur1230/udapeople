@@ -32,6 +32,9 @@ commands:
             sudo apt install -y nodejs
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      workflow_id:
+        type: string 
     steps:
       - run:
           name: Destroy environments
@@ -45,9 +48,9 @@ commands:
     steps:
       - run:
           name: Revert migrations
-          when: on_success
+          when: on_fail
           command: |
-            export SUCCESS="$(curl --insecure https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_"${CIRCLE_WORKFLOW_ID:0:7}")"
+            SUCCESS="$(curl --insecure https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_"${CIRCLE_WORKFLOW_ID:0:7}")"
             if(( SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -223,7 +226,8 @@ jobs:
             then
               curl -k https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      #- revert-migrations
+      - destroy-environment
+      - revert-migrations
 
   deploy-frontend:
     docker:
@@ -256,7 +260,9 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      #- destroy-environment
+      - destroy-environment
+      - revert-migrations
+
 
   deploy-backend:
     docker:
@@ -289,6 +295,8 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
+      - revert-migrations
+
 
   smoke-test:
     docker:
@@ -308,9 +316,9 @@ jobs:
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
             then
-              return 0
+              exit 0
             else
-              return 1
+              exit 1
             fi
 
       - run:
@@ -321,11 +329,13 @@ jobs:
             if curl -s ${URL} | grep "Welcome"
             then
               # Change this to 0 after the job fails
-              return 1
+              exit 1
             else
-              return 1
+              exit 1
             fi
-      - destroy-environment  
+      - destroy-environment
+      - revert-migrations
+
 
 workflows:
   default:
