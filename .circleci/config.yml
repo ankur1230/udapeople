@@ -20,14 +20,8 @@ commands:
           name: Revert migrations
           when: on_success
           command: |
-            #!/bin/bash
-            SUCCESS = $(curl --insecure https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_${CIRCLE_WORKFLOW_ID:0:7})
-            if(( $SUCCESS==1 )); 
-            then
-              cd ~/project/backend
-              npm install
-              npm run migrations:revert
-            fi
+            cd ~/project/backend
+            sh revert-migrations.sh
 
 jobs:
   build-frontend:
