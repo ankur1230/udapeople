@@ -20,7 +20,7 @@ commands:
           name: Revert migrations
           when: on_success
           command: |
-            SUCCESS="$(curl --insecure https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_"${CIRCLE_WORKFLOW_ID:0:7}")"
+            export SUCCESS="$(curl --insecure https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_"${CIRCLE_WORKFLOW_ID:0:7}")"
             if(( SUCCESS==1 )); 
             then
               cd ~/project/backend
@@ -196,7 +196,39 @@ jobs:
             then
               curl -k https://kvdb.io/26CFVW9rVsg3weDY3qP1q9/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-      - revert-migrations
+      #- revert-migrations
+
+  deploy-frontend:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible aws-cli nodejs npm 
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople" \
+              --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - destroy-environment   
 
 workflows:
   default:
@@ -211,9 +243,12 @@ workflows:
       #    requires: [build-frontend]
       #- scan-backend:
       #    requires: [build-backend]
-      #- deploy-infrastructure
+      - deploy-infrastructure
       #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #- configure-infrastructure:
-      #    requires: [deploy-infrastructure]
-      - run-migrations
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      #- run-migrations
       #    requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [configure-infrastructure]
+      #    requires: [run-migrations]
