@@ -219,6 +219,11 @@ jobs:
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
       - run:
+          name: Install dependencies
+          command: |
+            cd frontend
+            sudo npm install
+      - run:
           name: Deploy frontend objects
           command: |
             cd frontend
