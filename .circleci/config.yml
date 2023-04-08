@@ -216,8 +216,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      #- attach_workspace:
-      #    at: ~/
+      - attach_workspace:
+          at: ~/
       - run:
           name: Run migrations
           command: |
@@ -344,9 +344,12 @@ jobs:
 
   cloudfront-update:
     docker:
-      - image: amazon/aws-cli
+      - image: cimg/base:stable
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
+      - install_awscli
       - install_nodejs
       - run:
           name: Update cloudfront distribution
