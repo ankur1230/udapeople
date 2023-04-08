@@ -166,7 +166,7 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/
-      - run: yum install -y awscli
+      - run:  sudo snap install aws-cli --classic
       - run:
           name: Run migrations
           command: |
