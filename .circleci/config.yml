@@ -274,6 +274,7 @@ jobs:
           name: Package Backend
           command: |
             cd backend
+            npm install
             npm run build
             tar -czf artifact.tar.gz dist/* package*
             cd ..
@@ -288,6 +289,29 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
+
+  smoke-test:
+    docker:
+      # Lightweight Docker image 
+    steps:
+      # Checkout code from git
+      - run:
+          name: Install dependencies
+          command: |
+            # your code here
+      - run:
+          name: Get backend url
+          command: |
+            # your code here
+      - run:
+          name: Backend smoke test.
+          command: |
+            # your code here
+      - run:
+          name: Frontend smoke test.
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure  
 
 workflows:
   default:
@@ -314,3 +338,5 @@ workflows:
       - deploy-backend:
           requires: [configure-infrastructure]
       #    requires: [run-migrations]
+      #- smoke-test:
+      #    requires: [deploy-backend, deploy-frontend]
