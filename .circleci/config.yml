@@ -3,6 +3,33 @@ orbs:
   slack: circleci/slack@4.12.1
 
 commands:
+  install_awscli:
+    description: Install AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt install software-properties-common -y
+            sudo add-apt-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+  install_nodejs:
+    description: Install Node.js 13
+    steps:
+      - run:
+          name: Install Node.js 13
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            sudo apt install -y nodejs
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     steps:
@@ -204,16 +231,11 @@ jobs:
         user: root
     steps:
       - checkout
-      - run: yum install -y tar gzip
+      - run: sudo apt-get install tar gzip -y
       - restore_cache:
           keys: [frontend-build]
-      - run:
-          name: Install dependencies
-          command: |
-            sudo apt-get update && sudo apt-get install -yy less
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
+      - install_awscli
+      - install_nodejs
       - run:
           name: Get backend url
           command: |
@@ -245,22 +267,14 @@ jobs:
           fingerprints: ["8e:8d:95:19:20:bb:d8:50:6f:23:3e:b1:e4:c3:64:2e"]
       - attach_workspace:
           at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add tar
-            apk add gzip
-      - run:
-          name: Install nodejs
-          command: apk add nodejs
-      - run:
-          name: Install npm
-          command: apk add npm
+      - install_awscli
+      - install_ansible
+      - install_nodejs
       - run:
           name: Deploy backend
           command: |
             cd backend
-            npm i
+            npm install
             npm run build
             cd ..
             # Zip the directory
