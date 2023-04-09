@@ -2,5 +2,5 @@ Public Url to GitHub repository [URL01]:
 https://github.com/ankur1230/udapeople
 
 Public URL for your S3 Bucket [URL02]:
-http://udapeople-dc0c66b.s3-website-us-east-1.amazonaws.com/
+http://udapeople-aec2ef7.s3-website-us-east-1.amazonaws.com/
 
